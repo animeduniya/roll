@@ -1,0 +1,27 @@
+.bouncing-loader {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  transform: none !important;
+  will-change: none !important;
+}
+
+.bouncing-loader > div {
+  width: 8px;
+  height: 8px;
+  margin: 0 4px;
+  background-color: #ff0033;
+  border-radius: 50%;
+  display: inline-block;
+  transform: none !important;
+}
+
+@media (max-width: 768px) {
+  .bouncing-loader > div {
+    width: 6px;
+    height: 6px;
+    margin: 0 3px;
+  }
+}

@@ -1,0 +1,108 @@
+.art-subtitle {
+  padding-inline: 0px !important;
+  gap: 2px !important;
+}
+.art-volume-panel {
+  padding-bottom: 20px !important;
+}
+.art-settings {
+  margin-bottom: 20px !important;
+}
+.art-subtitle {
+  margin-bottom: 1rem !important;
+}
+.art-subtitle-line {
+  min-width: fit-content;
+  background-color: rgba(0, 0, 0, 0.479) !important;
+  padding-inline: 3px !important;
+}
+.art-subtitle-line,
+.art-subtitle-line * {
+  font-size: inherit !important;
+  color: inherit !important;
+  line-height: inherit !important;
+  font-weight: inherit !important;
+  white-space: inherit !important;
+}
+@media screen and (max-width: 370px) {
+  .art-progress {
+    padding-bottom: 5px !important;
+  }
+  .art-controls-left .art-control {
+    justify-content: flex-start !important;
+  }
+  .art-controls-right .art-control {
+    justify-content: flex-end !important;
+  }
+  .art-controls-right .art-control svg {
+    width: 22px;
+    height: 22px;
+  }
+  .art-controls-left .art-control svg {
+    width: 22px;
+    height: 22px;
+  }
+  .art-state .art-icon svg {
+    width: 50px;
+    height: 50px;
+  }
+}
+@media screen and (max-width: 350px) {
+  .art-controls-right .art-control svg {
+    width: 20px;
+    height: 20px;
+  }
+  .art-controls-left .art-control svg {
+    width: 20px;
+    height: 20px;
+  }
+}
+.artplayer-chapter {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.artplayer-chapter-intro,
+.artplayer-chapter-outro {
+  background: rgba(255, 255, 0, 0.5) !important;
+  border: 3px solid #ffd700 !important;
+  box-shadow: 0 0 10px rgba(255, 215, 0, 0.5) !important;
+}
+
+.artplayer-chapter-title {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #ffd700;
+  font-weight: bold;
+  font-size: 14px;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+  pointer-events: none;
+  z-index: 11;
+  padding: 4px 8px;
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 4px;
+}
+
+/* Add hover effect for better visibility */
+.artplayer-chapter-intro:hover,
+.artplayer-chapter-outro:hover {
+  background: rgba(255, 255, 0, 0.7) !important;
+  border: 3px solid #ffd700 !important;
+  box-shadow: 0 0 15px rgba(255, 215, 0, 0.7) !important;
+}
+
+/* Ensure the progress bar shows through */
+.art-progress {
+  z-index: 20;
+}
+
+/* Make sure the chapter markers are visible on top of the video */
+.art-video {
+  position: relative;
+  z-index: 1;
+}

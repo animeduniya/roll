@@ -1,0 +1,30 @@
+[33mcommit f00db2c837b413e1d12c26a091ad87c7f65058c8[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m
+Author: animeduniya <duniyabarbaad24@gmail.com>
+Date:   Sat Apr 19 10:24:14 2025 +0530
+
+    Optimize mobile performance: Remove animations, transitions, and GPU-intensive properties
+
+[33mcommit 0d88fc6ff829bea2263519cdab209367e3cd0b34[m
+Author: animeduniya <duniyabarbaad24@gmail.com>
+Date:   Sat Apr 19 08:22:54 2025 +0530
+
+    Update Player and Watch components: Improve mobile performance and touch event handling
+
+[33mcommit d2aa30efa4bb0dd652b1f5080c92895c41fcd186[m
+Author: animeduniya <duniyabarbaad24@gmail.com>
+Date:   Sat Apr 19 08:19:52 2025 +0530
+
+    perf: Remove animations and improve mobile performance - Add no-animations.css to disable all animations - Update components to remove transitions and effects - Optimize images with lazy loading - Remove hover effects and transforms
+
+[33mcommit e65e0e62f2455f5dc91b6fd94147030477737956[m
+Author: animeduniya <duniyabarbaad24@gmail.com>
+Date:   Sat Apr 19 08:14:07 2025 +0530
+
+    feat: Add performance optimizations - Add performance utilities - Implement service worker for caching - Add PWA support - Optimize HTML and assets
+
+[33mcommit 1c8aa5815ff1c17ce57d9e78f210175aed57fb5e[m
+Merge: 37f50a6 2319c5a
+Author: animeduniya <duniyabarbaad24@gmail.com>
+Date:   Sat Apr 19 07:50:17 2025 +0530
+
+    first commit

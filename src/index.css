@@ -1,0 +1,227 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&display=swap');
+
+@layer base {
+  :root {
+    --background: 0 0% 10%;
+    --foreground: 0 0% 98%;
+
+    --card: 0 0% 12%;
+    --card-foreground: 0 0% 98%;
+
+    --popover: 0 0% 12%;
+    --popover-foreground: 0 0% 98%;
+
+    --primary: 0 100% 50%;
+    --primary-foreground: 0 0% 98%;
+
+    --secondary: 0 100% 50%;
+    --secondary-foreground: 0 0% 98%;
+
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 80%;
+
+    --accent: 0 100% 50%;
+    --accent-foreground: 0 0% 98%;
+
+    --destructive: 0 100% 50%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 0 0% 20%;
+    --input: 0 0% 20%;
+    --ring: 0 100% 50%;
+
+    --radius: 0.75rem;
+
+    --sidebar-background: 0 0% 10%;
+    --sidebar-foreground: 0 0% 98%;
+    --sidebar-primary: 0 100% 50%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 0 100% 50%;
+    --sidebar-accent-foreground: 0 0% 98%;
+    --sidebar-border: 0 0% 20%;
+    --sidebar-ring: 0 100% 50%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    @apply scroll-smooth;
+  }
+
+  body {
+    @apply bg-devilish-dark text-foreground bg-[url('/images/dark-texture.png')] bg-repeat;
+    font-family: 'Poppins', sans-serif;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Cinzel', serif;
+  }
+
+  p {
+  }
+
+  button, .button {
+  }
+
+  .card {
+    @apply bg-devilish-darker/90 rounded-lg overflow-hidden shadow-lg hover:shadow-devilish-crimson/20;
+  }
+
+  .nav-link {
+  }
+}
+
+@layer components {
+  .text-shadow-fire {
+    text-shadow: 0 0 5px #ff0033, 0 0 10px #ff3300, 0 0 15px #ff5500;
+  }
+
+  .devil-card {
+    @apply bg-devilish-darker/90 rounded-lg overflow-hidden shadow-lg hover:shadow-devilish-crimson/20;
+  }
+
+  .devilish-button {
+    @apply bg-gradient-to-r from-devilish-crimson to-devilish-red text-white font-bold py-3 px-6 rounded-xl shadow-md;
+  }
+  
+  .devilish-gradient-text {
+    background: linear-gradient(45deg, #ff0033, #cc0000, #ff3300);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-fill-color: transparent;
+  }
+
+  .glass-effect {
+    @apply bg-devilish-darker/90 backdrop-blur-md border border-devilish-border/20 rounded-xl;
+  }
+
+  .text-glow {
+  }
+
+  .fire-effect {
+  }
+
+  .float-animation {
+  }
+
+  .slide-in {
+  }
+
+  .zoom-fade {
+  }
+
+  .rotate-glow {
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(15, 15, 15, 0.5);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 0, 51, 0.5);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 0, 51, 0.8);
+}
+
+/* Disable all animations and transitions globally */
+* {
+  animation: none !important;
+  transition: none !important;
+  transform: none !important;
+  will-change: none !important;
+  backface-visibility: visible !important;
+  perspective: none !important;
+  transform-style: flat !important;
+}
+
+/* Optimize mobile performance */
+@media (max-width: 768px) {
+  * {
+    transform: none !important;
+    transform-style: flat !important;
+    backface-visibility: visible !important;
+    perspective: none !important;
+  }
+
+  body {
+    -webkit-overflow-scrolling: touch;
+    overflow-scrolling: touch;
+  }
+
+  .card {
+    transform: none !important;
+    transition: none !important;
+  }
+
+  .hover-scale,
+  .hover-lift {
+    transform: none !important;
+  }
+
+  .text-shadow-fire {
+    text-shadow: none !important;
+  }
+
+  .devilish-gradient-text {
+    background: none !important;
+    -webkit-background-clip: none !important;
+    -webkit-text-fill-color: #ff0033 !important;
+    background-clip: none !important;
+    text-fill-color: #ff0033 !important;
+  }
+}
+
+/* Basic styles without animations */
+.button {
+  @apply bg-gradient-to-r from-devilish-crimson to-devilish-red text-white font-bold py-3 px-6 rounded-xl shadow-md;
+}
+
+.card-hover {
+  @apply hover:scale-105;
+}
+
+.card-shadow {
+  @apply hover:-translate-y-1 hover:shadow-lg;
+}
+
+/* Keep only essential hover effects without transitions */
+.hover-scale {
+  @apply hover:scale-105;
+}
+
+.hover-lift {
+  @apply hover:-translate-y-1 hover:shadow-lg;
+}
+
+.cursor-animated {
+  border-right: 2px solid #ff0033;
+}
+
+.text-gradient {
+  background: linear-gradient(45deg, #ff0033, #cc0000);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-fill-color: transparent;
+}
+
