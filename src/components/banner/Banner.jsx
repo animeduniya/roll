@@ -19,7 +19,7 @@ function Banner({ item, index }) {
       <img
         src={item.poster}
         alt={item.title}
-        className="absolute right-0 object-cover h-full w-[80%] bg-auto max-[1200px]:w-full max-[1200px]:bottom-0"
+        className="w-full h-full object-cover"
       />
       <div className="spotlight-overlay"></div>
       <div className="absolute flex flex-col left-0 bottom-[50px] w-[55%] p-4 z-10 max-[1390px]:w-[45%] max-[1390px]:bottom-[10px] max-[1300px]:w-[600px] max-[1120px]:w-[60%] max-md:w-[90%] max-[300px]:w-full">

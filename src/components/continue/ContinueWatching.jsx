@@ -94,9 +94,7 @@ const ContinueWatching = () => {
                   <img
                     src={item?.poster}
                     alt={item?.title}
-                    className="block w-full h-full object-cover transition-all duration-300 ease-in-out group-hover:blur-[4px]"
-                    title={item?.title}
-                    loading="lazy"
+                    className="w-full h-full object-cover"
                   />
                   <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                     <FontAwesomeIcon

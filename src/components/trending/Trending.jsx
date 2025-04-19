@@ -53,8 +53,7 @@ const Trending = ({ trending }) => {
                     <img
                       src={item.poster}
                       alt={item.title}
-                      className="block w-full h-full object-cover hover:cursor-pointer"
-                      title={item.title}
+                      className="w-full h-full object-cover"
                     />
                   </Link>
                 </div>

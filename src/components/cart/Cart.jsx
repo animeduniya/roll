@@ -49,10 +49,7 @@ function Cart({ label, data, path }) {
               <img
                 src={item.poster}
                 alt={item.title}
-                className="flex-shrink-0 w-[60px] h-[75px] rounded-md object-cover cursor-pointer"
-                onClick={() => navigate(`/watch/${item.id}`)}
-                onMouseEnter={() => handleImageEnter(item, index)}
-                onMouseLeave={handleImageLeave}
+                className="w-full h-full object-cover"
               />
 
               {hoveredItem === item.id + index && window.innerWidth > 1024 && (

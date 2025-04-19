@@ -1,5 +1,5 @@
 import Hls from "hls.js";
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState } from "react";
 import Artplayer from "artplayer";
 import artplayerPluginChapter from "./artPlayerPluinChaper";
 import autoSkip from "./autoSkip";
@@ -42,131 +42,6 @@ const KEY_CODES = {
   ARROW_LEFT: "arrowleft",
 };
 
-// Update HLS configuration with optimized start handling
-const hlsConfig = {
-  maxBufferLength: 30,
-  maxMaxBufferLength: 600,
-  maxBufferSize: 60 * 1000 * 1000,
-  maxBufferHole: 0.1,
-  lowLatencyMode: true,
-  backBufferLength: 90,
-  startLevel: -1,
-  abrEwmaDefaultEstimate: 500000,
-  testBandwidth: true,
-  progressive: true,
-  debug: false,
-  enableWorker: true,
-  startPosition: 0,
-  defaultAudioCodec: undefined,
-  fragLoadingTimeOut: 20000,
-  manifestLoadingTimeOut: 20000,
-  levelLoadingTimeOut: 20000,
-  fragLoadingMaxRetry: 6,
-  manifestLoadingMaxRetry: 6,
-  levelLoadingMaxRetry: 6,
-  startFragPrefetch: true,
-  appendErrorMaxRetry: 3,
-  enableCEA708Captions: true,
-  stretchShortVideoTrack: true,
-  maxAudioFramesDrift: 1,
-  forceKeyFrameOnDiscontinuity: true,
-  abrEwmaFastLive: 3,
-  abrEwmaSlowLive: 9,
-  abrEwmaFastVoD: 3,
-  abrEwmaSlowVoD: 9,
-  abrMaxWithRealBitrate: true,
-  maxStarvationDelay: 4,
-  maxLoadingDelay: 4,
-  minAutoBitrate: 0,
-};
-
-// Add retry mechanism for stuck playback
-const retryPlayback = (video, art, url, retryCount = 0) => {
-  if (retryCount >= 3) {
-    art.notice.show = "Failed to play video. Please refresh the page.";
-    return;
-  }
-
-  if (Hls.isSupported()) {
-    if (art.hls) art.hls.destroy();
-    const hls = new Hls(hlsConfig);
-    
-    let lastTime = 0;
-    let stuckCount = 0;
-    const checkStuck = setInterval(() => {
-      if (video.currentTime === lastTime && video.currentTime > 0) {
-        stuckCount++;
-        if (stuckCount >= 2) {
-          // If stuck, skip forward by 3 seconds
-          const newTime = Math.min(video.currentTime + 3, video.duration);
-          video.currentTime = newTime;
-          video.play().catch(() => {
-            art.notice.show = "Skipping ahead...";
-          });
-          stuckCount = 0;
-        }
-      } else {
-        stuckCount = 0;
-      }
-      lastTime = video.currentTime;
-    }, 1000);
-
-    hls.on(Hls.Events.ERROR, (event, data) => {
-      if (data.fatal) {
-        switch (data.type) {
-          case Hls.ErrorTypes.NETWORK_ERROR:
-            hls.startLoad();
-            break;
-          case Hls.ErrorTypes.MEDIA_ERROR:
-            hls.recoverMediaError();
-            break;
-          default:
-            hls.destroy();
-            retryPlayback(video, art, url, retryCount + 1);
-            break;
-        }
-      }
-    });
-
-    hls.on(Hls.Events.MANIFEST_PARSED, () => {
-      video.play().catch(() => {
-        art.notice.show = "Click to play";
-      });
-    });
-
-    hls.on(Hls.Events.FRAG_LOADED, () => {
-      art.notice.hide();
-      if (video.paused) {
-        video.play().catch(() => {
-          art.notice.show = "Click to play";
-        });
-      }
-    });
-
-    hls.on(Hls.Events.FRAG_LOADING, () => {
-      art.notice.show = "Loading...";
-    });
-
-    hls.loadSource(url);
-    hls.attachMedia(video);
-    art.hls = hls;
-
-    art.on("destroy", () => {
-      clearInterval(checkStuck);
-      hls.destroy();
-    });
-    video.addEventListener("timeupdate", () => handleTimeUpdate(video, art));
-  } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
-    video.src = url;
-    video.addEventListener("timeupdate", () => handleTimeUpdate(video, art));
-    video.play().catch(() => {
-      art.notice.show = "Click to play";
-    });
-  } else {
-    console.log("Unsupported playback format: m3u8");
-  }
-};
-
 export default function Player({
   streamUrl,
   subtitles,
@@ -200,7 +75,6 @@ export default function Player({
       setCurrentEpisodeIndex(newIndex);
     }
   }, [episodeId, episodes]);
-
   useEffect(() => {
     const applyChapterStyles = () => {
       const existingStyles = document.querySelectorAll(
@@ -223,55 +97,61 @@ export default function Player({
     }
   }, [streamUrl, intro, outro]);
 
-  const handleSubtitleChange = useCallback((art, item) => {
-    art.subtitle.switch(item.url, { name: item.html });
-    return item.html;
-  }, []);
+  const playM3u8 = (video, url, art) => {
+    if (Hls.isSupported()) {
+      if (art.hls) art.hls.destroy();
+      const hls = new Hls();
+      hls.loadSource(url);
+      hls.attachMedia(video);
+      art.hls = hls;
 
-  const handleTimeUpdate = useCallback((video, art) => {
-    const currentTime = Math.round(video.currentTime);
-    const duration = Math.round(video.duration);
-    if (duration > 0 && currentTime >= duration) {
-      art.pause();
-      if (currentEpisodeIndex < episodes?.length - 1 && autoNext) {
-        playNext(episodes[currentEpisodeIndex + 1].id.match(/ep=(\d+)/)?.[1]);
-      }
+      art.on("destroy", () => hls.destroy());
+
+      // hls.on(Hls.Events.ERROR, (event, data) => {
+      //   console.error("HLS.js error:", data);
+      // });
+      video.addEventListener("timeupdate", () => {
+        const currentTime = Math.round(video.currentTime);
+        const duration = Math.round(video.duration);
+        if (duration > 0) {
+          if (currentTime >= duration) {
+            art.pause();
+            if (currentEpisodeIndex < episodes?.length - 1 && autoNext) {
+              playNext(
+                episodes[currentEpisodeIndex + 1].id.match(/ep=(\d+)/)?.[1]
+              );
+            }
+          }
+        }
+      });
+    } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
+      video.src = url;
+      video.addEventListener("timeupdate", () => {
+        const currentTime = Math.round(video.currentTime);
+        const duration = Math.round(video.duration);
+        if (duration > 0) {
+          if (currentTime >= duration) {
+            art.pause();
+            if (currentEpisodeIndex < episodes?.length - 1 && autoNext) {
+              playNext(
+                episodes[currentEpisodeIndex + 1].id.match(/ep=(\d+)/)?.[1]
+              );
+            }
+          }
+        }
+      });
+    } else {
+      console.log("Unsupported playback format: m3u8");
     }
-  }, [currentEpisodeIndex, episodes, autoNext, playNext]);
-
-  const playM3u8 = useCallback((video, url, art) => {
-    retryPlayback(video, art, url);
-  }, [handleTimeUpdate]);
-
-  const handleResize = useCallback((art) => {
-    art.subtitle.style({
-      fontSize: (art.width > 500 ? art.width * 0.02 : art.width * 0.03) + "px",
-    });
-  }, []);
+  };
 
   const createChapters = () => {
     const chapters = [];
     if (intro?.start !== 0 || intro?.end !== 0) {
-      chapters.push({ 
-        start: intro.start, 
-        end: intro.end, 
-        title: "intro",
-        style: {
-          background: "rgba(255, 255, 0, 0.3)",
-          border: "2px solid yellow"
-        }
-      });
+      chapters.push({ start: intro.start, end: intro.end, title: "intro" });
     }
     if (outro?.start !== 0 || outro?.end !== 0) {
-      chapters.push({ 
-        start: outro.start, 
-        end: outro.end, 
-        title: "outro",
-        style: {
-          background: "rgba(255, 255, 0, 0.3)",
-          border: "2px solid yellow"
-        }
-      });
+      chapters.push({ start: outro.start, end: outro.end, title: "outro" });
     }
     return chapters;
   };
@@ -330,7 +210,6 @@ export default function Player({
 
   useEffect(() => {
     if (!streamUrl || !artRef.current) return;
-    
     const iframeUrl = streamInfo?.streamingLink?.iframe;
     const headers = {};
     if (iframeUrl) {
@@ -339,7 +218,6 @@ export default function Player({
     } else {
       headers.Referer = "https://megacloud.club/";
     }
-
     const art = new Artplayer({
       url:
         m3u8proxy[Math.floor(Math.random() * m3u8proxy?.length)] +
@@ -388,64 +266,6 @@ export default function Player({
         },
         escape: false,
       },
-      controls: [
-        {
-          name: "progress",
-          position: "top",
-          style: {
-            height: "3px",
-            background: "rgba(255, 255, 255, 0.2)",
-            transition: "none",
-          },
-          children: [
-            {
-              name: "played",
-              style: {
-                background: "#ff0033",
-                height: "100%",
-                transition: "none",
-              },
-            },
-            {
-              name: "loaded",
-              style: {
-                background: "rgba(255, 255, 255, 0.4)",
-                height: "100%",
-                transition: "none",
-              },
-            },
-            {
-              name: "thumb",
-              style: {
-                width: "12px",
-                height: "12px",
-                background: "#ff0033",
-                borderRadius: "50%",
-                border: "2px solid #fff",
-                top: "50%",
-                transform: "translateY(-50%)",
-                transition: "none",
-              },
-            },
-          ],
-        },
-        {
-          html: backward10Icon,
-          position: "right",
-          tooltip: "Backward 10s",
-          click: () => {
-            art.currentTime = Math.max(art.currentTime - 10, 0);
-          },
-        },
-        {
-          html: forward10Icon,
-          position: "right",
-          tooltip: "Forward 10s",
-          click: () => {
-            art.currentTime = Math.min(art.currentTime + 10, art.duration);
-          },
-        },
-      ],
       layers: [
         {
           name: website_name,
@@ -456,6 +276,7 @@ export default function Player({
             position: "absolute",
             top: "5px",
             right: "5px",
+            transition: "opacity 0.5s ease-out",
           },
         },
         {
@@ -512,6 +333,7 @@ export default function Player({
             top: "50%",
             transform: "translate(50%,-50%)",
             opacity: 0,
+            transition: "opacity 0.5s ease-in-out",
           },
           disable: !Artplayer.utils.isMobile,
         },
@@ -524,8 +346,27 @@ export default function Player({
             top: "50%",
             transform: "translate(50%, -50%)",
             opacity: 0,
+            transition: "opacity 0.5s ease-in-out",
           },
           disable: !Artplayer.utils.isMobile,
+        },
+      ],
+      controls: [
+        {
+          html: backward10Icon,
+          position: "right",
+          tooltip: "Backward 10s",
+          click: () => {
+            art.currentTime = Math.max(art.currentTime - 10, 0);
+          },
+        },
+        {
+          html: forward10Icon,
+          position: "right",
+          tooltip: "Forward 10s",
+          click: () => {
+            art.currentTime = Math.min(art.currentTime + 10, art.duration);
+          },
         },
       ],
       icons: {
@@ -545,19 +386,24 @@ export default function Player({
       },
     });
 
-    // Debounce resize handler
-    const debouncedResize = debounce(() => handleResize(art), 250);
-    window.addEventListener("resize", debouncedResize);
-
+    art.on("resize", () => {
+      art.subtitle.style({
+        fontSize:
+          (art.width > 500 ? art.width * 0.02 : art.width * 0.03) + "px",
+      });
+    });
     art.on("ready", () => {
-      art.layers[website_name].style.opacity = 0;
-      const ranges = [];
-      if (intro?.start != null && intro?.end != null && intro.start < intro.end) {
-        ranges.push([Math.floor(intro.start), Math.floor(intro.end)]);
-      }
-      if (outro?.start != null && outro?.end != null && outro.start < outro.end) {
-        ranges.push([Math.floor(outro.start), Math.floor(outro.end)]);
-      }
+      setTimeout(() => {
+        art.layers[website_name].style.opacity = 0;
+      }, 2000);
+      const ranges = [
+        ...(intro.start != null && intro.end != null
+          ? [[intro.start + 1, intro.end - 1]]
+          : []),
+        ...(outro.start != null && outro.end != null
+          ? [[outro.start + 1, outro.end]]
+          : []),
+      ];
       document.addEventListener("keydown", (event) =>
         handleKeydown(event, art)
       );
@@ -603,10 +449,13 @@ export default function Player({
               url: sub.file,
             })),
           ],
-          onSelect: handleSubtitleChange,
+          onSelect: function (item) {
+            art.subtitle.switch(item.url, { name: item.html });
+            return item.html;
+          },
         });
-      if (ranges.length > 0 && autoSkipIntro) {
-        art.plugins.add(autoSkip(ranges));
+      {
+        autoSkipIntro && art.plugins.add(autoSkip(ranges));
       }
       const defaultSubtitle = subtitles?.find(
         (sub) => sub.label.toLowerCase() === "english"
@@ -635,60 +484,8 @@ export default function Player({
             art.layers["forwardIcon"].style.opacity = 0;
           }, 300);
         });
-
-      // Add specific handling for start and intro
-      let lastTime = 0;
-      let stuckCount = 0;
-      const checkStuck = setInterval(() => {
-        if (art.currentTime === lastTime && art.currentTime > 0) {
-          stuckCount++;
-          if (stuckCount >= 2) {
-            // If stuck, skip forward by 3 seconds
-            const newTime = Math.min(art.currentTime + 3, art.duration);
-            art.seek = newTime;
-            art.play().catch(() => {
-              art.notice.show = "Skipping ahead...";
-            });
-            stuckCount = 0;
-          }
-        } else {
-          stuckCount = 0;
-        }
-        lastTime = art.currentTime;
-      }, 1000);
-
-      // Add pre-buffering for intro
-      if (intro?.start) {
-        const preBufferTime = Math.max(0, intro.start - 5);
-        art.on("video:timeupdate", () => {
-          if (art.currentTime >= preBufferTime && art.currentTime < intro.start) {
-            art.seek = intro.start;
-          }
-        });
-      }
-
-      // Add immediate playback handling
-      art.on("video:canplay", () => {
-        art.play().catch(() => {
-          art.notice.show = "Click to play";
-        });
-      });
-
-      art.on("video:play", () => {
-        art.notice.hide();
-      });
-
-      art.on("video:pause", () => {
-        if (art.currentTime === 0) {
-          art.play().catch(() => {
-            art.notice.show = "Click to play";
-          });
-        }
-      });
     });
-
     return () => {
-      window.removeEventListener("resize", debouncedResize);
       if (art && art.destroy) {
         art.destroy(false);
       }
@@ -719,9 +516,8 @@ export default function Player({
         "continueWatching",
         JSON.stringify(continueWatching)
       );
-      clearInterval(checkStuck);
     };
-  }, [streamUrl, subtitles, intro, outro, autoSkipIntro]);
+  }, [streamUrl, subtitles, intro, outro]);
 
   return <div ref={artRef} className="w-full h-full"></div>;
 }
